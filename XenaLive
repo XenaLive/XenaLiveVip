@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xena Live</title>
+<style>
+body { font-family: Arial; background: #fff; text-align: center; direction: rtl; margin:0; padding:0; }
+.page { display: none; padding: 20px; }
+.active { display: block; }
+h1 { color: #222; margin-bottom: 20px; }
+input { padding: 10px; width: 60%; margin: 10px 5px 10px 0; border: 1px solid #ccc; border-radius:5px; font-size:16px; text-align:center; }
+button { padding:10px 15px; border:none; border-radius:5px; background:#ccc; color:#222; font-weight:bold; cursor:pointer; margin:10px 5px; }
+button.activeBtn { background:#4caf50; color:#fff; }
+#getCodeBtn { background:#000; color:#fff; }
+#secureBtn { background:#4caf50; color:#fff; }
+#timer { margin:10px 0; font-size:18px; font-weight:bold; }
+.coins-box { margin:20px auto; padding:15px; border:2px solid #bbb; border-radius:10px; width:60%; font-size:20px; font-weight:bold; }
+.reward-section { margin:20px 0; }
+.reward-title { font-weight:bold; margin-bottom:8px; font-size:18px; color:#444; }
+.reward-btn { display:block; margin:0 auto 20px auto; width:160px; height:80px; border-radius:12px; background:#f2f2f2; border:1px solid #bbb; font-size:18px; font-weight:bold; color:#222; }
+.reward-btn span { display:block; font-size:20px; }
+.locked { color:red; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<!-- الصوت -->
+<audio id="coinSound" src="https://www.soundjay.com/coins/coin-drop-1.mp3"></audio>
+
+<!-- الصفحة الأولى -->
+<div id="page1" class="page active">
+  <h1>Xena Live</h1>
+  <input id="userId" placeholder="أدخل ID الخاص بك">
+  <button id="idBtn" disabled>التالي</button>
+
+  <div id="countSection" style="display:none;">
+    <p id="timer">300 ثانية</p>
+    <button id="getCodeBtn">استلام الكود</button>
+
+    <div id="codeSection" style="display:none; margin-top:10px;">
+      <input id="codeInput" placeholder="أدخل الكود">
+      <button id="confirmCodeBtn" style="display:none;">تأكيد الكود</button>
+      <p id="codeMsg" style="color:red;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- الصفحة الثانية -->
+<div id="page2" class="page">
+  <h2>ID: <span id="showId"></span></h2>
+  <div class="coins-box">رصيدي: <span id="coins">0</span> 🪙</div>
+
+  <div class="reward-section">
+    <div class="reward-title">جوائز الحساب</div>
+    <button class="reward-btn" onclick="addReward(5000000)">
+      <span>🪙</span> 5000000
+    </button>
+  </div>
+
+  <div class="reward-section">
+    <div class="reward-title">تعويض الألعاب</div>
+    <button class="reward-btn" onclick="addReward(4000000)">
+      <span>🪙</span> 4000000
+    </button>
+  </div>
+
+  <div class="locked">🔒 مجمد الرصيد لحين التأمين</div>
+  <button id="secureBtn" onclick="secureClick()">تأمين الرصيد</button>
+  <p id="secureMsg" style="color:red; font-weight:bold;"></p>
+</div>
+
+<!-- الصفحة الثالثة -->
+<div id="page3" class="page">
+  <h2 style="color:green;">✅ تمت العملية بنجاح</h2>
+  <p style="font-size:16px; margin:10px 0;">
+    يرجى استلام اشعار توثيق شحن من المشرف سلمى محمد عمار، يصلك الاشعار من حسابنا الرسمي
+  </p>
+  <button onclick="goWhatsapp()">استلام الكود</button>
+</div>
+
+<script>
+let countdown;
+let timeLeft = 300;
+let coins = 0;
+let secureTimerStarted = false;
+let secureReady = false;
+
+const userIdInput = document.getElementById('userId');
+const idBtn = document.getElementById('idBtn');
+const countSection = document.getElementById('countSection');
+const timer = document.getElementById('timer');
+const getCodeBtn = document.getElementById('getCodeBtn');
+const codeSection = document.getElementById('codeSection');
+const codeInput = document.getElementById('codeInput');
+const confirmCodeBtn = document.getElementById('confirmCodeBtn');
+const codeMsg = document.getElementById('codeMsg');
+const secureMsg = document.getElementById('secureMsg');
+
+// تفعيل الزر الأخضر عند إدخال ID
+userIdInput.addEventListener('input', () => {
+  if(userIdInput.value.trim() !== "") {
+    idBtn.disabled = false;
+    idBtn.classList.add('activeBtn');
+  } else {
+    idBtn.disabled = true;
+    idBtn.classList.remove('activeBtn');
+  }
+});
+
+// بدء العداد
+idBtn.addEventListener('click', () => {
+  countSection.style.display = 'block';
+  timer.innerText = timeLeft + " ثانية";
+  clearInterval(countdown);
+  countdown = setInterval(() => {
+    timeLeft--;
+    timer.innerText = timeLeft + " ثانية";
+    if(timeLeft <=0) clearInterval(countdown);
+  },1000);
+});
+
+// استلام الكود بداية
+getCodeBtn.addEventListener('click', () => {
+  window.open("https://wa.me/201554317768?text=أرغب%20باستلام%20الكود","_blank");
+  codeSection.style.display = 'block';
+});
+
+// إظهار زر التأكيد عند إدخال الكود
+codeInput.addEventListener('input', () => {
+  confirmCodeBtn.style.display = codeInput.value.trim()!==""?'inline-block':'none';
+});
+
+// تأكيد الكود
+confirmCodeBtn.addEventListener('click', () => {
+  if(codeInput.value==="155620"){
+    document.getElementById('page1').classList.remove('active');
+    document.getElementById('page2').classList.add('active');
+    document.getElementById('showId').innerText = userIdInput.value;
+  } else {
+    codeMsg.innerText="❌ الكود غير صحيح";
+  }
+});
+
+// إضافة الجوائز مع صوت وزيادة تصاعدية
+function addReward(amount){
+  const sound = document.getElementById('coinSound');
+  sound.play();
+  let current = coins;
+  let target = coins + amount;
+  let step = Math.ceil(amount/50);
+  let interval = setInterval(()=>{
+    current+=step;
+    if(current>=target){
+      current=target;
+      clearInterval(interval);
+    }
+    coins=current;
+    document.getElementById('coins').innerText=coins.toLocaleString();
+  },20);
+}
+
+// زر التأمين مع رسالة + تفعيل بعد 5 دقائق
+function secureClick(){
+  if(secureReady){
+    goPage3();
+  } else {
+    if(!secureTimerStarted){
+      secureMsg.innerText = "يرجى شحن تأمين 1مليون كوينزه ليتم اضافه الجائزه الى حسابك";
+      secureTimerStarted=true;
+      setTimeout(()=>{
+        secureReady=true;
+        secureMsg.innerText = "";
+      },5*60*1000); // 5 دقائق
+    } else {
+      alert("الرجاء الانتظار حتى انتهاء فترة التأمين 5 دقائق");
+    }
+  }
+}
+
+// الانتقال للصفحة الثالثة
+function goPage3(){
+  document.getElementById('page2').classList.remove('active');
+  document.getElementById('page3').classList.add('active');
+}
+
+// استلام إشعار في النهاية
+function goWhatsapp(){
+  window.location.href="https://wa.me/201554317768?text=تم%20استلام%20الإشعار";
+}
+</script>
+
+</body>
+</html>
